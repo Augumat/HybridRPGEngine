@@ -1,5 +1,6 @@
-package main.java.room.tile;
+package main.java.room;
 
 public class Room
 {
+
 }

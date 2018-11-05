@@ -1,5 +1,12 @@
 package main.java.room.tile;
 
-public class Tile
+/**
+ *
+ */
+public interface Tile
 {
+    /**
+     *
+     */
+    void display();
 }
