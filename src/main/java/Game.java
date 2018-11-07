@@ -2,18 +2,23 @@ package main.java;
 
 import javax.swing.*;
 import java.awt.image.*;
+import java.io.*;
+import javax.imageio.*;
 
 /**
  * This is the uppermost part of the engine if you will.  It handles everything on a macro level.
  */
 public class Game
 {
-    /** The starting title of the Game. */
+    /** The starting title of the game window. */
     private static final String DEFAULT_WINDOW_TITLE = "Working Title";
-    /** The starting title of the Game. */
+    /** The starting title of the game window. */
     private static final int DEFAULT_WINDOW_WIDTH = 256;
-    /** The starting title of the Game. */
+    /** The starting title of the game window. */
     private static final int DEFAULT_WINDOW_HEIGHT = 192;
+    /** The starting icon of the game window. */
+    private static final BufferedImage DEFAULT_WINDOW_ICON =
+            new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
     
     /** The width of the window as set at startup or during runtime. */
     private static int windowWidth;
@@ -71,11 +76,17 @@ public class Game
         windowTitle = DEFAULT_WINDOW_TITLE;
         windowWidth = DEFAULT_WINDOW_WIDTH;
         windowHeight = DEFAULT_WINDOW_HEIGHT;
+        try
+        {
+            windowIcon = ImageIO.read(new File("src/main/resources/icon.png"));
+        }
+        catch (java.io.IOException exception)
+        {
+            windowIcon = DEFAULT_WINDOW_ICON;
+        }
         
         gameWindow = new JFrame(windowTitle);
         gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //stub get window icon
-        windowIcon = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
         gameWindow.setIconImage(windowIcon);
         gameWindow.setVisible(true);
         setWindowDim(windowWidth, windowHeight);
@@ -84,6 +95,7 @@ public class Game
     public static void main(String unused[])
     {
         initialize();
+        //stub testing
         while (gameWindow != null)
         {
             System.out.println("running...");
