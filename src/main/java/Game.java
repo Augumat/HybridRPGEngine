@@ -1,18 +1,22 @@
 package main.java;
 
 import javax.swing.*;
-import java.awt.image.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
 
 /**
  * This is the uppermost part of the engine if you will.  It handles everything on a macro level.
  */
-public class Game
+public class Game implements KeyListener
 {
     /** The starting title of the game window. */
     private static final String DEFAULT_WINDOW_TITLE = "Working Title";
+    /** The default sprite scale. */
+    public static final int DEFAULT_SPRITE_SCALE = 1;
     /** The starting title of the game window. */
     private static final int DEFAULT_WINDOW_WIDTH = 256;
     /** The starting title of the game window. */
@@ -20,11 +24,16 @@ public class Game
     /** The width of the monitor that the game is playing on. */
     private static final int FULLSCREEN_WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     /** The height of the monitor that the game is playing on. */
-    private static int FULLSCREEN_HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+    private static final int FULLSCREEN_HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+    /** The sprite scale to be used in fullscreen. */
+    private static final int FULLSCREEN_SPRITE_SCALE = FULLSCREEN_WIDTH / FULLSCREEN_HEIGHT /** stub */;
     /** The fullscreen constant for use in resizeWindow. */
     private static final int FULLSCREEN = 0;
     /** The starting icon of the game window. */
     private static final BufferedImage DEFAULT_WINDOW_ICON = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+    
+    /** The current scale of all Sprites in the program. */
+    public static int currentSpriteScale;
     
     /** The width of the window as set at startup or during runtime. */
     private static int windowWidth;
@@ -34,8 +43,11 @@ public class Game
     private static String windowTitle;
     /** The current icon of gameWindow. */
     private static BufferedImage windowIcon;
+    
     /** The window of the game. */
     private static JFrame gameWindow;
+    /** The game's main draw panel */
+    private static JPanel gamePanel;
     
     
     
@@ -54,6 +66,7 @@ public class Game
             gameWindow.setExtendedState(JFrame.MAXIMIZED_BOTH);
             windowWidth = FULLSCREEN_WIDTH;
             windowHeight = FULLSCREEN_HEIGHT;
+            currentSpriteScale = FULLSCREEN_SPRITE_SCALE;
         }
         else if (newScale > 0 && newScale * Math.max(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT) < Math.min(FULLSCREEN_HEIGHT, FULLSCREEN_WIDTH))
         {
@@ -62,6 +75,7 @@ public class Game
             windowWidth = newScale * DEFAULT_WINDOW_WIDTH;
             windowHeight = newScale * DEFAULT_WINDOW_HEIGHT;
             gameWindow.setSize(windowWidth, windowHeight);
+            currentSpriteScale = newScale;
         }
         else
         {
@@ -70,14 +84,17 @@ public class Game
             windowWidth = DEFAULT_WINDOW_WIDTH;
             windowHeight = DEFAULT_WINDOW_HEIGHT;
             gameWindow.setSize(windowWidth, windowHeight);
+            currentSpriteScale = DEFAULT_SPRITE_SCALE;
         }
-        //stub set content scaling
-        //stub update scaled content
+        gameWindow.setLocationRelativeTo(null);
         gameWindow.setVisible(true);
     }
     /** Runs when the program first launches. */
     private static void initialize()
     {
+        //sets the values of the runtime window data
+        //stub load settings for last screen size on startup
+        currentSpriteScale = DEFAULT_SPRITE_SCALE;
         windowTitle = DEFAULT_WINDOW_TITLE;
         windowWidth = DEFAULT_WINDOW_WIDTH;
         windowHeight = DEFAULT_WINDOW_HEIGHT;
@@ -87,19 +104,54 @@ public class Game
         }
         catch (java.io.IOException exception)
         {
+            System.out.println("[ERROR] Failed to load window icon.");
             windowIcon = DEFAULT_WINDOW_ICON;
         }
-        
+        //initializes the game window with the default window name, sets the close operation, and sets the window icon.
         gameWindow = new JFrame(windowTitle);
         gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameWindow.setIconImage(windowIcon);
-        resizeWindow(1);
-        //setWindowDim(windowWidth, windowHeight);
+        //adds
+        gamePanel = new JPanel();
+        gameWindow.add(gamePanel);
+        
+        gameWindow.requestFocus();
+        
+        resizeWindow(4);
     }
     /** When run, launches the game. */
     public static void main(String unused[])
     {
         initialize();
+        //g.drawImage(windowIcon, 1, 1, null);
         System.out.println("Finished.");
+    }
+    
+    /**
+     * Detects when a key is typed.
+     * @param event the event triggered by the key interaction.
+     */
+    @Override
+    public void keyTyped(KeyEvent event)
+    {
+        return;
+    }
+    /**
+     * Detects when a key is pressed.
+     * @param event the event triggered by the key interaction.
+     */
+    @Override
+    public void keyPressed(KeyEvent event)
+    {
+        return;
+    }
+    /**
+     * Detects when a key is released.
+     * @param event the event triggered by the key interaction.
+     */
+    @Override
+    public void keyReleased(KeyEvent event)
+    {
+        return;
     }
 }
