@@ -46,10 +46,18 @@ public class Game implements KeyListener
     
     /** The window of the game. */
     private static JFrame gameWindow;
-    /** The game's main draw panel */
-    private static JPanel gamePanel;
+    /** The game's canvas for drawing */
+    private static Canvas gameCanvas;
     
     
+    /**
+     * Checks whether the game is fullscreen.
+     * @return true if the window is fullscreen.
+     */
+    public static boolean isFullscreen()
+    {
+        return windowWidth == FULLSCREEN_WIDTH && windowHeight == FULLSCREEN_HEIGHT;
+    }
     
     /**
      * This method resizes gameWindow according to a provided scalar.
@@ -86,12 +94,23 @@ public class Game implements KeyListener
             gameWindow.setSize(windowWidth, windowHeight);
             currentSpriteScale = DEFAULT_SPRITE_SCALE;
         }
+        try
+        {
+            gameCanvas.setPreferredSize(new Dimension(windowWidth, windowHeight));
+            gameCanvas.setMinimumSize(new Dimension(windowWidth, windowHeight));
+            gameCanvas.setMaximumSize(new Dimension(windowWidth, windowHeight));
+        }
+        catch (NullPointerException exception)
+        {
+            System.out.println(System.currentTimeMillis() + " Game.resizeWindow: Skipped canvas resizing during initialization (caught null pointer)");
+        }
         gameWindow.setLocationRelativeTo(null);
         gameWindow.setVisible(true);
     }
     /** Runs when the program first launches. */
     private static void initialize()
     {
+        System.out.println(System.currentTimeMillis() + " Game.initialize: Initializing...");
         //sets the values of the runtime window data
         //stub load settings for last screen size on startup
         currentSpriteScale = DEFAULT_SPRITE_SCALE;
@@ -110,20 +129,24 @@ public class Game implements KeyListener
         //initializes the game window with the default window name, sets the close operation, and sets the window icon.
         gameWindow = new JFrame(windowTitle);
         gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gameWindow.setResizable(false);
+        gameWindow.setLocationRelativeTo(null);
         gameWindow.setIconImage(windowIcon);
-        //adds
-        gamePanel = new JPanel();
-        gameWindow.add(gamePanel);
-        
+        resizeWindow(FULLSCREEN);
         gameWindow.requestFocus();
-        
-        resizeWindow(4);
+        //initializes the canvas with the previously set window size and adds it to the JFrame.
+        gameCanvas = new Canvas();
+        gameCanvas.setPreferredSize(new Dimension(windowWidth, windowHeight));
+        gameCanvas.setMinimumSize(new Dimension(windowWidth, windowHeight));
+        gameCanvas.setMaximumSize(new Dimension(windowWidth, windowHeight));
+        gameWindow.add(gameCanvas);
+        //pack the game window
+        gameWindow.pack();
     }
     /** When run, launches the game. */
     public static void main(String unused[])
     {
         initialize();
-        //g.drawImage(windowIcon, 1, 1, null);
         System.out.println("Finished.");
     }
     

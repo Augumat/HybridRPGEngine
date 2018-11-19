@@ -1,4 +1,4 @@
-package main.java.actor;
+package main.java.sprite.actor;
 
 /**
  *
