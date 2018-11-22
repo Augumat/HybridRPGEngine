@@ -1,4 +1,4 @@
-package main.java.sprite;
+package main.java.display;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;

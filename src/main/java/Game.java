@@ -16,7 +16,7 @@ public class Game implements Runnable
     //variables
     /** The starting title of the game window. */
     private final String DEFAULT_WINDOW_TITLE = "Working Title";
-    /** The default sprite scale. */
+    /** The default display scale. */
     private final int DEFAULT_SPRITE_SCALE = 1;
     /** The starting title of the game window. */
     private final int DEFAULT_WINDOW_WIDTH = 256;
@@ -26,7 +26,7 @@ public class Game implements Runnable
     private final int FULLSCREEN_WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     /** The height of the monitor that the game is playing on. */
     private final int FULLSCREEN_HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-    /** The sprite scale to be used in fullscreen. */
+    /** The display scale to be used in fullscreen. */
     private final int FULLSCREEN_SPRITE_SCALE = FULLSCREEN_WIDTH / FULLSCREEN_HEIGHT /** stub */;
     /** The fullscreen constant for use in resizeWindow. */
     private final int FULLSCREEN = 0;
@@ -75,8 +75,8 @@ public class Game implements Runnable
         return windowWidth == FULLSCREEN_WIDTH && windowHeight == FULLSCREEN_HEIGHT;
     }
     /**
-     * Returns the current sprite scaling factor.
-     * @return the current sprite scale.
+     * Returns the current display scaling factor.
+     * @return the current display scale.
      */
     public int getCurrentSpriteScale()
     {

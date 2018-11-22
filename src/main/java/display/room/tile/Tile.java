@@ -1,4 +1,4 @@
-package main.java.sprite.room.tile;
+package main.java.display.room.tile;
 
 /**
  *
