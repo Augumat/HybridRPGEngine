@@ -15,13 +15,13 @@ public class Game implements Runnable
 {
     //variables
     /** The starting title of the game window. */
-    private final String DEFAULT_WINDOW_TITLE = "Working Title";
+    private static final String DEFAULT_WINDOW_TITLE = "Working Title";
     /** The default display scale. */
-    private final int DEFAULT_SPRITE_SCALE = 1;
+    private static final int DEFAULT_SPRITE_SCALE = 1;
     /** The starting title of the game window. */
-    private final int DEFAULT_WINDOW_WIDTH = 256;
+    private static final int DEFAULT_WINDOW_WIDTH = 256;
     /** The starting title of the game window. */
-    private final int DEFAULT_WINDOW_HEIGHT = 192;
+    private static final int DEFAULT_WINDOW_HEIGHT = 192;
     /** The width of the monitor that the game is playing on. */
     private final int FULLSCREEN_WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     /** The height of the monitor that the game is playing on. */
@@ -29,7 +29,7 @@ public class Game implements Runnable
     /** The display scale to be used in fullscreen. */
     private final int FULLSCREEN_SPRITE_SCALE = FULLSCREEN_WIDTH / FULLSCREEN_HEIGHT /** stub */;
     /** The fullscreen constant for use in resizeWindow. */
-    private final int FULLSCREEN = 0;
+    private static final int FULLSCREEN = 0;
     /** The starting icon of the game window. */
     private final BufferedImage DEFAULT_WINDOW_ICON = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
     
@@ -67,22 +67,6 @@ public class Game implements Runnable
     
     //aux methods
     /**
-     * Checks whether the game is fullscreen.
-     * @return true if the window is fullscreen.
-     */
-    public boolean isFullscreen()
-    {
-        return windowWidth == FULLSCREEN_WIDTH && windowHeight == FULLSCREEN_HEIGHT;
-    }
-    /**
-     * Returns the current display scaling factor.
-     * @return the current display scale.
-     */
-    public int getCurrentSpriteScale()
-    {
-        return currentSpriteScale;
-    }
-    /**
      * This method resizes gameWindow according to a provided scalar.
      * @param newScale FULLSCREEN sets the window to fullscreen, other integers set the window size to the default
      *                 parameters times this input as a scalar.  NOTE- Will not set window to a size larger than
@@ -90,7 +74,7 @@ public class Game implements Runnable
      */
     private void resizeWindow(final int newScale)
     {
-        log("src.main.java.Game.resizeWindow", LOG_TRACE, "Entered resizeWindow.");
+        log("src.main.java.Game.resizeWindow", LOG_DEFAULT, "Entering resizeWindow.", LOG_ENTERING);
         gameWindow.setVisible(false);
         if (newScale == FULLSCREEN)
         //sets the scale to its fullscreen size
@@ -134,13 +118,14 @@ public class Game implements Runnable
         }
         gameWindow.setLocationRelativeTo(null);
         gameWindow.setVisible(true);
+        log("src.main.java.Game.resizeWindow", LOG_DEFAULT, "Exiting resizeWindow.", LOG_EXITING);
     }
     
     //core methods
     /** Runs when the program first launches. */
     private void init()
     {
-        log("src.main.java.Game.init", LOG_DEFAULT, "Entered init.");
+        log("src.main.java.Game.init", LOG_DEFAULT, "Entered init.", LOG_ENTERING);
         
         //sets the values of the runtime window data
         //stub load settings for last screen size on startup
@@ -171,9 +156,11 @@ public class Game implements Runnable
         gameCanvas.setMinimumSize(new Dimension(windowWidth, windowHeight));
         gameCanvas.setMaximumSize(new Dimension(windowWidth, windowHeight));
         gameWindow.add(gameCanvas);
-        //pack the game window and start the game
+        //pack the game window
         gameWindow.pack();
+        //starts the game thread
         start();
+        log("src.main.java.Game.init", LOG_DEFAULT, "Exited init.", LOG_EXITING);
     }
     /** Updates local variables. */
     private void tick()
@@ -218,7 +205,7 @@ public class Game implements Runnable
             log("src.main.java.Game.start", LOG_DEFAULT,"Starting thread...");
             running = true;
             gameThread = new Thread(this);
-            gameThread.start();
+            //gameThread.start();
             return;
         }
         log("src.main.java.Game.start", LOG_WARNING,"Method called while Game was running");
@@ -233,7 +220,8 @@ public class Game implements Runnable
             try
             {
                 gameThread.join();
-            } catch (InterruptedException exception)
+            }
+            catch (InterruptedException exception)
             {
                 exception.printStackTrace();
             }
@@ -253,8 +241,16 @@ public class Game implements Runnable
     public static final int LOG_WARNING = 1;
     /** The code for no traces at all. */
     public static final int LOG_VOID = 0;
-    /** The debug mode of the Game. */
+    
+    /** The code for entering a block in the debug logger. */
+    public static final int LOG_ENTERING = 1;
+    /** The code for exiting a block in the debug logger. */
+    public static final int LOG_EXITING = -1;
+    
+    /** The current debug mode of the Game. */
     private int debugMode;
+    /** The current indentation level of the debug logger. */
+    private int currentLogIndent;
     
     /**
      * Logs an event in console for debug purposes.
@@ -266,7 +262,37 @@ public class Game implements Runnable
     {
         if (debugMode >= type)
         {
-            System.out.println("[" + System.currentTimeMillis() + "] [" + LOG_CODES[type] + "] @ " + location + " == " + message);
+            String tempOut = "[" + System.currentTimeMillis() + "] [" + LOG_CODES[type] + "] @ ";
+            for (int i = 0; i < currentLogIndent; i++)
+            {
+                tempOut += " ";
+            }
+            tempOut += location + " == " + message;
+            System.out.println(tempOut);
+        }
+    }
+    /**
+     * Logs an event in console for debug purposes.
+     * @param location the location in the project that the call originates from.
+     * @param type the type of event being logged.
+     * @param message the update message.
+     * @param indent ENTERING if entering a method, EXITING if exiting a method.
+     */
+    public void log(String location, int type, String message, int indent)
+    {
+        if (debugMode >= type)
+        {
+            String tempOut = "[" + System.currentTimeMillis() + "] [" + LOG_CODES[type] + "] @ ";
+            for (int i = 0; i < currentLogIndent; i++)
+            {
+                tempOut += " ";
+            }
+            tempOut += location + " == " + message;
+            System.out.println(tempOut);
+        }
+        if (indent == LOG_ENTERING || indent == LOG_EXITING)
+        {
+            currentLogIndent += indent;
         }
     }
 }
