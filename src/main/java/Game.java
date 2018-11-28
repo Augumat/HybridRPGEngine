@@ -8,9 +8,7 @@ import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
 
-/**
- * This is the uppermost part of the engine if you will.  It handles everything on a macro level.
- */
+/** This is the uppermost part of the engine if you will.  It handles everything on a macro level. */
 public class Game implements Runnable
 {
     //variables
@@ -45,6 +43,9 @@ public class Game implements Runnable
     /** The current icon of gameWindow. */
     private BufferedImage windowIcon;
     
+    /** The current instance's Logger. */
+    private Logger l;
+    
     /** The game thread. */
     private Thread gameThread;
     /** Whether or not the thread is running. */
@@ -56,17 +57,17 @@ public class Game implements Runnable
     private Canvas gameCanvas;
     /** The canvas's buffer strategy. */
     private BufferStrategy gameBufferStrategy;
-    /** */
-    private Graphics2D graphics;
+    /** The graphics object used to paint the canvas. */
+    private Graphics2D g;
     
     //constructors
     /** Default constructor, sets a clean debug profile. */
     public Game() {
-        debugMode = LOG_VOID;
+        l = new Logger(Logger.LOG_VOID);
     }
     /** Debug constructor, sets the passed debug profile. */
     public Game(int profile) {
-        debugMode = profile;
+       l = new Logger(profile);
     }
     
     //aux methods
@@ -78,7 +79,7 @@ public class Game implements Runnable
      */
     private void resizeWindow(final int newScale)
     {
-        log("src.main.java.Game.resizeWindow", LOG_DEFAULT, "Entering resizeWindow.", LOG_ENTERING);
+        l.log("src.main.java.Game.resizeWindow", l.LOG_DEFAULT, "Entering resizeWindow.", l.LOG_ENTERING);
         gameWindow.setVisible(false);
         if (newScale == FULLSCREEN)
         //sets the scale to its fullscreen size
@@ -90,7 +91,8 @@ public class Game implements Runnable
             windowHeight = FULLSCREEN_HEIGHT;
             currentSpriteScale = FULLSCREEN_SPRITE_SCALE;
         }
-        else if (newScale > 0 && newScale * Math.max(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT) < Math.min(FULLSCREEN_HEIGHT, FULLSCREEN_WIDTH))
+        //stub this is inaccurate vvv
+        else if (newScale > 1 && newScale * Math.max(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT) < Math.min(FULLSCREEN_HEIGHT, FULLSCREEN_WIDTH))
         //sets the scaled window if it is within the bounds of the monitor
         {
             gameWindow.setUndecorated(false);
@@ -118,19 +120,18 @@ public class Game implements Runnable
         }
         catch (NullPointerException exception)
         {
-            log("src.main.java.Game.resizeWindow", LOG_WARNING, "Caught null pointer and skipped canvas changes while resizing gameWindow.");
+            l.log("src.main.java.Game.resizeWindow", l.LOG_WARNING, "Caught null pointer and skipped canvas changes while resizing gameWindow.");
         }
         gameWindow.setLocationRelativeTo(null);
         gameWindow.setVisible(true);
-        log("src.main.java.Game.resizeWindow", LOG_DEFAULT, "Exiting resizeWindow.", LOG_EXITING);
+        l.log("src.main.java.Game.resizeWindow", l.LOG_DEFAULT, "Exiting resizeWindow.", l.LOG_EXITING);
     }
     
     //core methods
     /** Runs when the program first launches. */
     private void init()
     {
-        log("src.main.java.Game.init", LOG_DEFAULT, "Entered init.", LOG_ENTERING);
-        
+        l.log("src.main.java.Game.init", l.LOG_DEFAULT, "Entered init.", l.LOG_ENTERING);
         //sets the values of the runtime window data
         //stub load settings for last screen size on startup
         currentSpriteScale = DEFAULT_SPRITE_SCALE;
@@ -143,7 +144,7 @@ public class Game implements Runnable
         }
         catch (java.io.IOException exception)
         {
-            log("src.main.java.game.init", LOG_WARNING, "Failed to load window icon.");
+            l.log("src.main.java.game.init", l.LOG_WARNING, "Failed to load window icon.");
             windowIcon = DEFAULT_WINDOW_ICON;
         }
         //initializes the game window with the default window name, sets the close operation, and sets the window icon.
@@ -162,19 +163,19 @@ public class Game implements Runnable
         gameWindow.add(gameCanvas);
         //packs the window.
         gameWindow.pack();
-        log("src.main.java.Game.init", LOG_DEFAULT, "Exited init.", LOG_EXITING);
+        l.log("src.main.java.Game.init", l.LOG_DEFAULT, "Exited init.", l.LOG_EXITING);
     }
     /** Updates local variables. */
     private void tick()
     {
-        log("src.main.java.Game.tick", LOG_TRACE,"Entered tick.");
-        
-        
+        l.log("src.main.java.Game.tick", l.LOG_TRACE,"Entered tick.", l.LOG_ENTERING);
+    
+        l.log("src.main.java.Game.tick", l.LOG_TRACE,"Exited tick.", l.LOG_EXITING);
     }
     /** Sends everything to the canvas to be rendered. */
-    private void draw()
+    private void pushCanvas()
     {
-        log("src.main.java.Game.draw", LOG_TRACE,"Entered draw.");
+        l.log("src.main.java.Game.pushCanvas", l.LOG_TRACE,"Entered pushCanvas.", l.LOG_ENTERING);
         //checks buffer strategy and creates a new one if there are none found.
         gameBufferStrategy = gameCanvas.getBufferStrategy();
         if (gameBufferStrategy == null)
@@ -182,27 +183,35 @@ public class Game implements Runnable
             gameCanvas.createBufferStrategy(3);
             return;
         }
-        graphics = (Graphics2D) gameBufferStrategy.getDrawGraphics();
+        g = (Graphics2D) gameBufferStrategy.getDrawGraphics();
         try
         {
-            //stub testing
-            graphics.setBackground(Color.BLACK);
-            graphics.clearRect(0,0, windowWidth, windowHeight);
-            graphics.fillRect(1, 1, 64, 64);
-            graphics.fillRect(64, 64, 128, 128);
+            //draws to the buffer canvas
+            draw();
         }
-        finally
+        finally //always triggers regardless of exceptions.
         {
             //saves the changes to graphics and pops the current canvas and wipes graphics.
             gameBufferStrategy.show();
-            graphics.dispose();
+            g.dispose();
         }
+        l.log("src.main.java.Game.pushCanvas", l.LOG_TRACE,"Exited pushCanvas.", l.LOG_EXITING);
+    }
+    /** Where all of the actual rendering to the buffer canvas takes place. */
+    private void draw()
+    {
+        //stub testing
+        g.setBackground(Color.BLACK);
+        g.clearRect(0,0, windowWidth, windowHeight);
+        g.fillRect(1 * currentSpriteScale, 1 * currentSpriteScale, 32 * currentSpriteScale, 32 * currentSpriteScale);
+        g.fillRect(32 * currentSpriteScale, 32 * currentSpriteScale, 64 * currentSpriteScale, 64 * currentSpriteScale);
+        g.fillRect(96 * currentSpriteScale, 96 * currentSpriteScale, 128 * currentSpriteScale, 128 * currentSpriteScale);
     }
     
     /** When run, launches the game. */
     public void run()
     {
-        log("src.main.java.Game.run", LOG_DEFAULT,"Started.");
+        l.log("src.main.java.Game.run", l.LOG_DEFAULT,"Started.");
         
         //initialize the game
         init();
@@ -214,32 +223,32 @@ public class Game implements Runnable
         while (running)
         {
             tick();
-            draw();
+            pushCanvas();
         }
         
         // stops the game
         stop();
         
-        log("src.main.java.Game.run", LOG_DEFAULT,"Finished.");
+        l.log("src.main.java.Game.run", l.LOG_DEFAULT,"Finished.");
     }
     /** Starts the thread. */
     public synchronized void start()
     {
         if (!running)
         {
-            log("src.main.java.Game.start", LOG_DEFAULT,"Starting thread...");
+            l.log("src.main.java.Game.start", l.LOG_DEFAULT,"Starting thread...");
             running = true;
             gameThread = new Thread(this);
             return;
         }
-        log("src.main.java.Game.start", LOG_WARNING,"Method called while Game was running");
+        l.log("src.main.java.Game.start", l.LOG_WARNING,"Method called while Game was running");
     }
     /** Stops the thread. */
     public synchronized void stop()
     {
         if (running)
         {
-            log("src.main.java.Game.stop", LOG_DEFAULT,"Stopping thread...");
+            l.log("src.main.java.Game.stop", l.LOG_DEFAULT,"Stopping thread...");
             running = false;
             try
             {
@@ -251,72 +260,6 @@ public class Game implements Runnable
             }
             return;
         }
-        log("src.main.java.Game.stop", LOG_WARNING,"Method called while Game was not running");
-    }
-    
-    //debug logging
-    /** String form of the log codes used by Game.log. */
-    public static final String[] LOG_CODES = {"   /   ", "WARNING", "  LOG  ", " TRACE "};
-    /** The code for an often repeated trace. */
-    public static final int LOG_TRACE = 3;
-    /** The code for a basic log message. */
-    public static final int LOG_DEFAULT = 2;
-    /** The code for a potentially problematic event. */
-    public static final int LOG_WARNING = 1;
-    /** The code for no traces at all. */
-    public static final int LOG_VOID = 0;
-    
-    /** The code for entering a block in the debug logger. */
-    public static final int LOG_ENTERING = 1;
-    /** The code for exiting a block in the debug logger. */
-    public static final int LOG_EXITING = -1;
-    
-    /** The current debug mode of the Game. */
-    private int debugMode;
-    /** The current indentation level of the debug logger. */
-    private int currentLogIndent;
-    
-    /**
-     * Logs an event in console for debug purposes.
-     * @param location the location in the project that the call originates from.
-     * @param type the type of event being logged.
-     * @param message the update message.
-     */
-    public void log(String location, int type, String message)
-    {
-        if (debugMode >= type)
-        {
-            String tempOut = "[" + System.currentTimeMillis() + "] [" + LOG_CODES[type] + "] @ ";
-            for (int i = 0; i < currentLogIndent; i++)
-            {
-                tempOut += " ";
-            }
-            tempOut += location + " == " + message;
-            System.out.println(tempOut);
-        }
-    }
-    /**
-     * Logs an event in console for debug purposes.
-     * @param location the location in the project that the call originates from.
-     * @param type the type of event being logged.
-     * @param message the update message.
-     * @param indent ENTERING if entering a method, EXITING if exiting a method.
-     */
-    public void log(String location, int type, String message, int indent)
-    {
-        if (debugMode >= type)
-        {
-            String tempOut = "[" + System.currentTimeMillis() + "] [" + LOG_CODES[type] + "] @ ";
-            for (int i = 0; i < currentLogIndent; i++)
-            {
-                tempOut += " ";
-            }
-            tempOut += location + " == " + message;
-            System.out.println(tempOut);
-        }
-        if (indent == LOG_ENTERING || indent == LOG_EXITING)
-        {
-            currentLogIndent += indent;
-        }
+        l.log("src.main.java.Game.stop", l.LOG_WARNING,"Method called while Game was not running");
     }
 }

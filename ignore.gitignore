@@ -1,0 +1,2 @@
+$ cat .git/info/exclude
+*todo.txt
