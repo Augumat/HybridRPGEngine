@@ -52,8 +52,12 @@ public class Game implements Runnable
     
     /** The window of the game. */
     private JFrame gameWindow;
-    /** The game's canvas for drawing */
+    /** The game's canvas for drawing. */
     private Canvas gameCanvas;
+    /** The canvas's buffer strategy. */
+    private BufferStrategy gameBufferStrategy;
+    /** */
+    private Graphics2D graphics;
     
     //constructors
     /** Default constructor, sets a clean debug profile. */
@@ -114,7 +118,7 @@ public class Game implements Runnable
         }
         catch (NullPointerException exception)
         {
-            log("src.main.java.Game.resizeWindow", LOG_WARNING, "Caught null pointer and skipped canvas resizing while resizing gameWindow.");
+            log("src.main.java.Game.resizeWindow", LOG_WARNING, "Caught null pointer and skipped canvas changes while resizing gameWindow.");
         }
         gameWindow.setLocationRelativeTo(null);
         gameWindow.setVisible(true);
@@ -156,10 +160,8 @@ public class Game implements Runnable
         gameCanvas.setMinimumSize(new Dimension(windowWidth, windowHeight));
         gameCanvas.setMaximumSize(new Dimension(windowWidth, windowHeight));
         gameWindow.add(gameCanvas);
-        //pack the game window
+        //packs the window.
         gameWindow.pack();
-        //starts the game thread
-        start();
         log("src.main.java.Game.init", LOG_DEFAULT, "Exited init.", LOG_EXITING);
     }
     /** Updates local variables. */
@@ -173,8 +175,28 @@ public class Game implements Runnable
     private void draw()
     {
         log("src.main.java.Game.draw", LOG_TRACE,"Entered draw.");
-        
-        
+        //checks buffer strategy and creates a new one if there are none found.
+        gameBufferStrategy = gameCanvas.getBufferStrategy();
+        if (gameBufferStrategy == null)
+        {
+            gameCanvas.createBufferStrategy(3);
+            return;
+        }
+        graphics = (Graphics2D) gameBufferStrategy.getDrawGraphics();
+        try
+        {
+            //stub testing
+            graphics.setBackground(Color.BLACK);
+            graphics.clearRect(0,0, windowWidth, windowHeight);
+            graphics.fillRect(1, 1, 64, 64);
+            graphics.fillRect(64, 64, 128, 128);
+        }
+        finally
+        {
+            //saves the changes to graphics and pops the current canvas and wipes graphics.
+            gameBufferStrategy.show();
+            graphics.dispose();
+        }
     }
     
     /** When run, launches the game. */
@@ -184,6 +206,9 @@ public class Game implements Runnable
         
         //initialize the game
         init();
+    
+        //starts the game
+        start();
         
         //the game's entire body, repetition of this loop
         while (running)
@@ -205,7 +230,6 @@ public class Game implements Runnable
             log("src.main.java.Game.start", LOG_DEFAULT,"Starting thread...");
             running = true;
             gameThread = new Thread(this);
-            //gameThread.start();
             return;
         }
         log("src.main.java.Game.start", LOG_WARNING,"Method called while Game was running");
